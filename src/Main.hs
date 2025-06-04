@@ -52,6 +52,9 @@ import qualified Distribution.Text                      as C
 #if MIN_VERSION_Cabal(3,7,0)
 import qualified Distribution.Simple.PackageDescription as C
 #endif
+#if MIN_VERSION_Cabal(3,14,0)
+import Distribution.Utils.Path (makeSymbolicPath)
+#endif
 
 import           Lens.Micro
 import           Lens.Micro.Mtl
@@ -652,8 +655,16 @@ mainWithOptions Options{ optHost, optCommand } = do
 
            return ()
 
-           (pkgn,pkgv,xrev) <- pkgDescToPkgIdXrev <$> C.readGenericPackageDescription C.deafening optSyCFile
        SyncCabal (SyncCOptions{ optSyCFile, optSyCIncrRev, optSyCForce }) -> do
+           (pkgn,pkgv,xrev) <- pkgDescToPkgIdXrev <$>
+             C.readGenericPackageDescription
+               C.deafening
+#if MIN_VERSION_Cabal(3,14,0)
+               Nothing
+               (makeSymbolicPath optSyCFile)
+#else
+               optSyCFile
+#endif
            cab0 <- BS.readFile optSyCFile
 
            BS8.putStrLn $ mconcat [ "local :  "
@@ -736,7 +747,15 @@ mainWithOptions Options{ optHost, optCommand } = do
            putStrLn $ "Using Hackage credentials for username " ++ show username
 
            forM_ optPsCFiles $ \fn -> do
-               (pkgn, pkgv, xrev0) <- pkgDescToPkgIdXrev <$> C.readGenericPackageDescription C.deafening fn
+               (pkgn, pkgv, xrev0) <- pkgDescToPkgIdXrev <$>
+                 C.readGenericPackageDescription
+                   C.deafening
+#if MIN_VERSION_Cabal(3,14,0)
+                   Nothing
+                   (makeSymbolicPath fn)
+#else
+                   fn
+#endif
                let xrev = applyWhen optPsCIncrRev (+1) xrev0
 
                putStrLn $ concat [ "Pushing ", show fn

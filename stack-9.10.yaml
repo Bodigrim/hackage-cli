@@ -1,3 +1,7 @@
-resolver: nightly-2025-01-06
-compiler: ghc-9.10.1
+resolver: nightly-2025-05-28
+compiler: ghc-9.10.2
 compiler-check: match-exact
+
+flags:
+  HsOpenSSL:
+    use-pkg-config: true
