@@ -79,9 +79,9 @@ import qualified Distribution.Types.GenericPackageDescription.Lens as LC
 
 -- import Cabal
 
-import Distribution.Server.Util.CabalRevisions
-import IndexShaSum
-import CabalEdit
+import           Distribution.Server.Util.CabalRevisions  ( diffCabalRevisions, Change(Change) )
+import           IndexShaSum                              ( IndexShaSumOptions(IndexShaSumOptions), run )
+import           CabalEdit                                ( PkgRev, cabalEditXRev )
 
 type PkgName = ByteString
 type PkgVer  = ByteString
@@ -623,9 +623,9 @@ main = do
     mainWithOptions opts
 
 mainWithOptions :: Options -> IO ()
-mainWithOptions Options {..} = do
+mainWithOptions Options{ optHost, optCommand } = do
    case optCommand of
-       PullCabal (PullCOptions {..}) -> do
+       PullCabal (PullCOptions{ optPlCPkgName, optPlCIncrRev, optPlCForce, optPlCPkgVers }) -> do
            let pkgn = optPlCPkgName
 
            cs <- runHConn (fetchAllCabalFiles pkgn (fromMaybe C.anyVersion optPlCPkgVers))
@@ -652,8 +652,8 @@ mainWithOptions Options {..} = do
 
            return ()
 
-       SyncCabal (SyncCOptions {..}) -> do
            (pkgn,pkgv,xrev) <- pkgDescToPkgIdXrev <$> C.readGenericPackageDescription C.deafening optSyCFile
+       SyncCabal (SyncCOptions{ optSyCFile, optSyCIncrRev, optSyCForce }) -> do
            cab0 <- BS.readFile optSyCFile
 
            BS8.putStrLn $ mconcat [ "local :  "
@@ -702,12 +702,12 @@ mainWithOptions Options {..} = do
 
                      BS.writeFile optSyCFile cab'
                      BS8.putStrLn $ mconcat [ "local :  "
-                                            , pkgn, "-", pkgv, "-r", BS8.pack (show $ xrev')
+                                            , pkgn, "-", pkgv, "-r", BS8.pack (show xrev')
                                             , "   ('", BS8.pack optSyCFile, "')"
                                             ]
 
 
-       ListCabal (ListCOptions {..}) -> do
+       ListCabal (ListCOptions{ optLCPkgName, optNoAnn, optRevUrls }) -> do
            let pkgn = optLCPkgName
 
            vs <- runHConn (fetchVersions pkgn)
@@ -731,7 +731,7 @@ mainWithOptions Options {..} = do
                  BS8.putStrLn $ status <> pkgn <> "-" <> v
            return ()
 
-       PushCabal (PushCOptions {..}) -> do
+       PushCabal (PushCOptions{ optPsCIncrRev, optPsCPublish, optPsCFiles }) -> do
            (username,password) <- maybe (fail "missing Hackage credentials") return =<< getHackageCreds
            putStrLn $ "Using Hackage credentials for username " ++ show username
 
@@ -754,7 +754,7 @@ mainWithOptions Options {..} = do
                BS8.putStrLn (tidyHtml tmp)
                putStrLn (replicate 80 '=')
 
-       PushCandidate (PushPCOptions {..}) -> do
+       PushCandidate (PushPCOptions{ optPPCFiles }) -> do
            (username,password) <- maybe (fail "missing Hackage credentials") return =<< getHackageCreds
            putStrLn $ "Using Hackage credentials for username " ++ show username
 
@@ -770,7 +770,7 @@ mainWithOptions Options {..} = do
                putStrLn (replicate 80 '=')
 
 
-       CheckRevision (CheckROptions {..}) -> do
+       CheckRevision (CheckROptions{ optCRNew, optCROrig }) -> do
            old <- BS.readFile optCROrig
            new <- BS.readFile optCRNew
 
