@@ -1,5 +1,13 @@
 # Changelog for hackage-cli
 
+## 0.1.0.3
+
+_Andreas Abel, 2025-06-04_
+
+- Fix for `Cabal-3.14.*`.
+
+Builds with `Cabal 3.4 - 3.14` and `GHC 8.2 - 9.12`.
+
 ## 0.1.0.2
 
 _Andreas Abel, 2024-07-02_
