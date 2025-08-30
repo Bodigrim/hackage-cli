@@ -4,6 +4,10 @@
 {-# LANGUAGE RecordWildCards    #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
+#if __GLASGOW_HASKELL__ >= 900
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+#endif
+
 -- |
 -- Module      :  IndexShaSum
 -- Copyright   :  Herbert Valerio Riedel

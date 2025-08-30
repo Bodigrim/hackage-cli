@@ -1,5 +1,13 @@
 # Changelog for hackage-cli
 
+## 0.1.0.4
+
+_Andreas Abel, 2025-08-30_
+
+- Remove unused dependencies of test-suite
+
+Builds with `Cabal 3.4 - 3.16` and `GHC 8.2 - 9.14 alpha1`.
+
 ## 0.1.0.3
 
 _Andreas Abel, 2025-06-04_
